@@ -9,6 +9,13 @@ import sys
 import time
 from typing import Optional
 
+# Windows: Rich emoji/box-drawing output crashes on cp1252 terminals.
+# Reconfigure stdout to UTF-8 so the dashboard and CLI render correctly.
+try:
+    sys.stdout.reconfigure(encoding="utf-8")
+except Exception:
+    pass
+
 import click
 from rich.console import Console
 from rich.table import Table
