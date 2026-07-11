@@ -3,9 +3,7 @@
 Local-first, framework-agnostic tracing/replay/evals harness for AI agents.
 Records every LLM + tool call (tokens, cost, latency) to SQLite; deterministic
 replay; golden-task scoring; regression diffs; FastAPI dashboard.
-Plan: `_docs/plans/AGENT_FLIGHT_RECORDER_PLAN.md`. This project exists to back
-the "evals & observability" resume claim. **Not yet pushed — no commits, no
-remote; treat as fragile.**
+Plan: `_docs/plans/AGENT_FLIGHT_RECORDER_PLAN.md`. Repo: https://github.com/mhmdtaha091/flight-recorder
 
 ## Commands
 
