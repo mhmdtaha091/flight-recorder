@@ -12,6 +12,7 @@ from __future__ import annotations
 
 import copy
 import json
+import os
 import re
 import time
 import uuid
@@ -118,12 +119,43 @@ class RuleCheck:
 
 
 class LLMJudge:
-    """LLM-as-judge for fuzzy outcome scoring."""
+    """LLM-as-judge for fuzzy outcome scoring.
 
-    def __init__(self, api_key: str = "", model: str = "claude-sonnet-5", base_url: str = ""):
-        self.api_key = api_key
-        self.model = model
-        self.base_url = base_url or "https://api.anthropic.com/v1"
+    Provider-agnostic: defaults to openai-compatible (DeepSeek) for cost.
+    Set JUDGE_PROVIDER=anthropic to use Claude, or JUDGE_MODEL / JUDGE_BASE_URL
+    for any OpenAI-compatible endpoint (Ollama, Groq, Gemini, etc.).
+    """
+
+    def __init__(
+        self,
+        api_key: str = "",
+        model: str = "",
+        base_url: str = "",
+        provider: str = "",
+    ):
+        self.provider = provider or os.environ.get("JUDGE_PROVIDER", "openai-compatible")
+        self.api_key = api_key or os.environ.get(
+            "ANTHROPIC_API_KEY" if self.provider == "anthropic" else "OPENAI_API_KEY",
+            "",
+        )
+        # Default model per provider
+        default_models = {
+            "anthropic": "claude-haiku-4-5-20251001",
+            "openai": "gpt-4o-mini",
+            "openai-compatible": "deepseek-chat",
+            "gemini": "gemini-2.0-flash",
+        }
+        self.model = model or os.environ.get("JUDGE_MODEL") or default_models.get(self.provider, "deepseek-chat")
+        # Default base URL per provider
+        default_urls = {
+            "anthropic": "https://api.anthropic.com/v1",
+            "openai": "https://api.openai.com/v1",
+            "openai-compatible": "https://api.deepseek.com/v1",
+            "gemini": "https://generativelanguage.googleapis.com/v1beta/openai/chat/completions",
+        }
+        self.base_url = base_url or os.environ.get("JUDGE_BASE_URL") or default_urls.get(
+            self.provider, "https://api.deepseek.com/v1"
+        )
 
     def evaluate(
         self, judge_prompt: str, run_data: dict, expected: str
@@ -163,25 +195,11 @@ Respond with ONLY the JSON object."""
         try:
             import httpx
 
-            resp = httpx.post(
-                f"{self.base_url}/messages",
-                headers={
-                    "Content-Type": "application/json",
-                    "x-api-key": self.api_key,
-                    "anthropic-version": "2023-06-01",
-                },
-                json={
-                    "model": self.model,
-                    "max_tokens": 512,
-                    "messages": [{"role": "user", "content": prompt}],
-                },
-                timeout=30,
-            )
-            if resp.status_code != 200:
-                return (0.0, f"Judge API error: {resp.status_code}")
+            if self.provider == "anthropic":
+                text = self._call_anthropic(prompt)
+            else:
+                text = self._call_openai_compatible(prompt)
 
-            data = resp.json()
-            text = data["content"][0]["text"]
             # Extract JSON
             match = re.search(r"\{[\s\S]*\}", text)
             if match:
@@ -192,6 +210,50 @@ Respond with ONLY the JSON object."""
 
         except Exception as e:
             return (0.0, f"Judge evaluation failed: {e}")
+
+    def _call_anthropic(self, prompt: str) -> str:
+        import httpx
+
+        resp = httpx.post(
+            f"{self.base_url}/messages",
+            headers={
+                "Content-Type": "application/json",
+                "x-api-key": self.api_key,
+                "anthropic-version": "2023-06-01",
+            },
+            json={
+                "model": self.model,
+                "max_tokens": 512,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=30,
+        )
+        if resp.status_code != 200:
+            raise RuntimeError(f"Judge API error ({self.provider}): {resp.status_code}")
+        data = resp.json()
+        return data["content"][0]["text"]
+
+    def _call_openai_compatible(self, prompt: str) -> str:
+        import httpx
+
+        resp = httpx.post(
+            f"{self.base_url}/chat/completions",
+            headers={
+                "Content-Type": "application/json",
+                "Authorization": f"Bearer {self.api_key}",
+            },
+            json={
+                "model": self.model,
+                "max_tokens": 512,
+                "temperature": 0.1,
+                "messages": [{"role": "user", "content": prompt}],
+            },
+            timeout=30,
+        )
+        if resp.status_code != 200:
+            raise RuntimeError(f"Judge API error ({self.provider}): {resp.status_code} - {resp.text[:200]}")
+        data = resp.json()
+        return data["choices"][0]["message"]["content"]
 
 
 class TaskScorer:
