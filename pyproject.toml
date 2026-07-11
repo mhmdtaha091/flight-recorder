@@ -1,0 +1,33 @@
+[build-system]
+requires = ["setuptools>=75", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "flight-recorder"
+version = "0.1.0"
+description = "Local-first evaluation, tracing & replay harness for AI agents"
+readme = "README.md"
+license = {text = "MIT"}
+authors = [{name = "Muhammad Taha Khan", email = "mhmdtaha091@gmail.com"}]
+requires-python = ">=3.11"
+dependencies = [
+    "click>=8",
+    "rich>=13",
+    "pyyaml>=6",
+    "httpx>=0.28",
+    "fastapi>=0.115",
+    "uvicorn>=0.34",
+    "pydantic>=2",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-cov>=6",
+]
+
+[project.scripts]
+flightrec = "flightrec.cli:main"
+
+[tool.setuptools.packages.find]
+include = ["flightrec*"]
