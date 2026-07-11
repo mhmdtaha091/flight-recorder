@@ -180,13 +180,41 @@ regression diffs.
 | v3 | Dashboard + multi-agent instrumentation | ✅ Done |
 | — | Test suite (40 tests) + offline demo | ✅ Done |
 
+## Demo output
+
+```bash
+$ python examples/demo.py
+
+── 1. Record a run ─────────────────────────────────────────
+   run 94345319  •  3 steps  •  $0.00026
+
+── 2. Score against a golden suite (rule checks only) ──────
+   pass rate 100%  (1/1 tasks)
+
+── 3. Replay the recorded run deterministically ────────────
+   replayed 1 LLM call(s) from the recording  •  $0.00026  •  1.0ms  •  0 live API calls
+
+── 4. Regression: v1 vs v2 on the same suite ───────────────
+# 🔍 Regression Report: v1 → v2
+
+**Suite:** mail
+**Verdict:** ✅ v2 is strictly better (+1 improvements, 0 regressions)
+
+| Metric | v1 | v2 | Δ |
+| ------ | ----- | ----- | -- |
+| Pass Rate | 0.0% | 100.0% | +100.0% |
+| Avg Score | 0.00 | 0.70 | +0.70 |
+| Cost | $0.0003 | $0.0003 | $+0.0000 |
+| Latency | 0ms | 0ms | +0ms |
+```
+
 ## Metrics
 
 All numbers are real, measured, and verifiable:
 
-- Trace overhead (must be negligible per step)
-- Improvements enabled: Jarvis task success X%→Y%, PentestAI recall measured, BugScout flake rate before/after
-- Cost trends over time
+- **Demo stats:** 5 runs recorded, 800 tokens, $0.0013 total cost, fully offline
+- **Test suite:** 40 pytest tests, all green — covers store, SDK, scoring, replay, regression
+- **Dogfood targets (upcoming):** Jarvis 5-core-job eval · PentestAI benchmark playbook · BugScout flake rate
 
 ## Comparison
 
