@@ -6,8 +6,8 @@ Flight Recorder is a **local-first, framework-agnostic** harness that records ev
 
 ## Why Flight Recorder?
 
-- **Backs the resume claim** — "evals & observability" goes from empty keywords to a shipped project
-- **Three real customers** already exist locally: Jarvis, PentestAI, and BugScout (Web QA Agent)
+- **You can't trust an agent you can't replay** — a run that only exists in stdout is a run you can't debug, diff, or defend
+- **Dogfooded from day one** — built to trace three of the author's own agents: Jarvis (personal assistant), PentestAI (security agent), and BugScout (web QA agent)
 - **Local-first** — SQLite, no SaaS, no telemetry. Works offline. You own your data.
 - **Framework-agnostic** — decorator/context-manager pattern works on hand-rolled loops (not just LangChain)
 - **Replay-centric** — deterministic replay is the killer feature; swap one variable and A/B diff
@@ -141,6 +141,10 @@ print(f"Pass rate: {result['pass_rate']:.1%}")
 
 ## Dashboard
 
+<!-- TODO: hero screenshot — run `flightrec --db flightrec-demo.db serve`, open a run's
+     step-by-step timeline view, capture it, save as docs/dashboard-timeline.png,
+     and embed here. No screenshot yet — do not fake one. -->
+
 Launch with `flightrec serve` → opens at **http://localhost:8421**
 
 - **Runs list** — all recorded runs with cost, latency, token counts
@@ -234,7 +238,7 @@ All numbers are real, measured, and verifiable:
 - **SQLite** — WAL-mode, foreign keys, indexed
 - **FastAPI** — REST API for dashboard
 - **React 18** — Dashboard SPA (CDN, zero build step)
-- **Claude API** — LLM-judge for fuzzy evaluation
+- **Pluggable LLM-judge** — any OpenAI-compatible endpoint (DeepSeek by default), Anthropic, Gemini, or local Ollama; set `JUDGE_PROVIDER` / `JUDGE_MODEL` / `JUDGE_BASE_URL`
 
 ## Dogfood Targets
 

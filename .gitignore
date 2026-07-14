@@ -4,8 +4,16 @@ __pycache__/
 dist/
 build/
 .env
-.env.local
+.env.*
 flightrec.db
 *.db
+*.sqlite3
 .venv/
 venv/
+.pytest_cache/
+.coverage
+htmlcov/
+node_modules/
+.DS_Store
+Thumbs.db
+Desktop.ini
