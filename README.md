@@ -1,5 +1,7 @@
 # ✈️ Flight Recorder — Agent Telemetry, Replay & Evals
 
+[![CI](https://github.com/mhmdtaha091/flight-recorder/actions/workflows/ci.yml/badge.svg)](https://github.com/mhmdtaha091/flight-recorder/actions/workflows/ci.yml)
+
 > Record everything your AI agent does. Replay it deterministically. Score it. Ship with confidence.
 
 Flight Recorder is a **local-first, framework-agnostic** harness that records every LLM call, tool call, token count, cost, and latency from your AI agents. It lets you replay runs deterministically, score them against golden task suites, and catch regressions between agent versions — with a web dashboard showing pass rate, cost, and latency trends over time.
